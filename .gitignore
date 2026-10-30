@@ -1,0 +1,11 @@
+# slides and everything derived from them stay local
+data/
+out/
+*.svs
+*.part
+
+__pycache__/
+*.pyc
+.venv/
+.vscode/
+Thumbs.db

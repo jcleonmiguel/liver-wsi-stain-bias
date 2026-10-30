@@ -1,0 +1,14 @@
+# install PyTorch first, with the CUDA build for your GPU:
+# https://pytorch.org/get-started/locally/
+torch
+numpy
+pandas
+requests
+tqdm
+openslide-python
+openslide-bin
+scikit-image
+scipy
+scikit-learn
+matplotlib
+pillow
