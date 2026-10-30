@@ -1,0 +1,3 @@
+condition,slide_specific_clusters,mean_top_slide_share,knn_same_slide,knn_chance,cross_slide_same_site,cross_slide_site_chance
+raw,2,0.54,0.92,0.1,0.63,0.18
+macenko,2,0.55,0.88,0.1,0.56,0.18
