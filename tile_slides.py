@@ -57,12 +57,18 @@ def tissue_mask(slide, size=2048):
 
 
 def tile_qc(img):
-    arr = np.asarray(img.convert("RGB")).astype(np.float32)
-    r, g, b = arr[..., 0], arr[..., 1], arr[..., 2]
+    rgb = np.asarray(img.convert("RGB"))
+    arr = rgb.astype(np.float32)
     white = float((arr.min(axis=2) > 220).mean())
-    # marker ink: clearly bluer or greener than the pink/purple H&E
-    ink = ((b > r + 40) & (b > g + 20)) | ((g > r + 20) & (g > b + 20))
-    pen = float(ink.mean())
+    # Marker ink is saturated blue or green. The first version used an
+    # RGB rule ("bluer than red") and threw away dense tumour areas,
+    # because hematoxylin is purple-blue too. Hue separates them:
+    # hematoxylin sits around 0.70-0.75, outside both windows.
+    hsv = color.rgb2hsv(rgb)
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    blue = (h >= 0.50) & (h < 0.65) & (s > 0.55) & (v > 0.25)
+    green = (h >= 0.22) & (h < 0.45) & (s > 0.45) & (v > 0.25)
+    pen = float((blue | green).mean())
     # variance of the Laplacian as a focus measure
     gray = arr.mean(axis=2)
     lap = (-4 * gray[1:-1, 1:-1] + gray[:-2, 1:-1] + gray[2:, 1:-1]
@@ -109,7 +115,7 @@ def process(path, out_root, max_tiles, min_tissue, blur_thr,
     # relative to each slide's median, with a fixed floor
     blur_cut = max(blur_thr, 0.3 * float(cand.blur_var.median()))
     cand["keep"] = ((cand.white_frac <= max_white)
-                    & (cand.pen_frac <= 0.02)
+                    & (cand.pen_frac <= 0.05)
                     & (cand.blur_var >= blur_cut))
     cand["tile_l0"] = tile_l0
     cand["slide"] = path.stem
